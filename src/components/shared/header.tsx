@@ -13,12 +13,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { motion } from "framer-motion";
 
 const Header = () => {
   const { data: session, status } = useSession();
 
   return (
-    <header className="flex py-4 items-center justify-between max-w-4xl mx-auto ">
+    <motion.header
+      className="flex py-4 items-center justify-between max-w-4xl mx-auto "
+      initial={{ opacity: 0, y: -24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
+    >
       <Logo />
 
       <div className="flex items-center gap-2">
@@ -62,7 +68,7 @@ const Header = () => {
         )}
         <ThemeToggle />
       </div>
-    </header>
+    </motion.header>
   );
 };
 
