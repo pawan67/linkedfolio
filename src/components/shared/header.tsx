@@ -2,7 +2,7 @@
 import Logo from "./logo";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@iconify/react/dist/iconify.js";
+import { Icon } from "@iconify/react";
 import ThemeToggle from "./theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -50,15 +50,14 @@ const Header = () => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => signOut()}>
-                <Icon icon="lucide:log-out" className="mr-2 h-4 w-4" />
+                <Icon icon="devicon:google" width="96" height="96" />{" "}
                 <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
           <Button onClick={() => signIn("google")}>
-            Get Started
-            <Icon icon="stash:signin-duotone" width="20" height="20" />
+            <Icon icon="devicon-plain:google" width="20" height="20" /> Sign in
           </Button>
         )}
         <ThemeToggle />
