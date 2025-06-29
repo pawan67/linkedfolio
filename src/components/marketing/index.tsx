@@ -132,20 +132,22 @@ export default function Home() {
             visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
           }}
         >
-          <Image
-            className=" rounded-lg hidden dark:block"
-            src={"/images/image-dark.png"}
-            alt="portfolio"
-            width={500}
-            height={500}
-          />
-          <Image
-            className=" rounded-lg dark:hidden block"
-            src={"/images/image-light.png"}
-            alt="portfolio"
-            width={500}
-            height={500}
-          />
+          <div className="relative w-full max-w-[500px] aspect-[619/917] mx-auto">
+            <Image
+              className="rounded-lg hidden dark:block"
+              src={"/images/image-dark.png"}
+              alt="portfolio"
+              fill
+              style={{ objectFit: "cover" }}
+            />
+            <Image
+              className="rounded-lg dark:hidden block"
+              src={"/images/image-light.png"}
+              alt="portfolio"
+              fill
+              style={{ objectFit: "cover" }}
+            />
+          </div>
         </motion.div>
       </div>
     </motion.div>
