@@ -56,14 +56,19 @@ const Header = () => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => signOut()}>
-                <Icon icon="devicon:google" width="96" height="96" />{" "}
+                <Icon
+                  icon="mdi:logout"
+                  width="18"
+                  className=" mr-2"
+                  height="18"
+                />{" "}
                 <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
           <Button onClick={() => signIn("google")}>
-            <Icon icon="devicon-plain:google" width="20" height="20" /> Sign in
+            <Icon icon="devicon:google" width="20" height="20" /> Sign in
           </Button>
         )}
         <ThemeToggle />
