@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { Badge } from "../ui/badge";
 import Image from "next/image";
 
-export default function Home({ profileCount }: { profileCount: number }) {
+export default function Home() {
   const router = useRouter();
   const { status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
@@ -79,9 +79,6 @@ export default function Home({ profileCount }: { profileCount: number }) {
               ? "Upload Resume"
               : "Get Started"}
           </Button>
-          <p className="text-sm text-muted-foreground mt-4">
-            {profileCount} portfolios have been created so far.
-          </p>
         </div>
 
         <div>

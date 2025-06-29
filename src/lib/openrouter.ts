@@ -77,16 +77,39 @@ ${pdfText}
 ---
 `;
 
-  const completion = await openai.chat.completions.create({
-    model: "mistralai/mistral-small-3.2-24b-instruct-2506:free",
-    messages: [
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-    temperature: 0.2,
-  });
+  let completion;
+  try {
+    completion = await openai.chat.completions.create({
+      model: "mistralai/mistral-small-3.2-24b-instruct-2506:free",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.2,
+    });
+    console.log(
+      "[OpenRouter] API response:",
+      JSON.stringify(completion, null, 2)
+    );
+  } catch (apiError) {
+    console.error("[OpenRouter] API call failed:", apiError);
+    return { error: "OpenRouter API call failed", details: apiError };
+  }
+
+  if (
+    !completion ||
+    !completion.choices ||
+    !Array.isArray(completion.choices) ||
+    !completion.choices[0]?.message?.content
+  ) {
+    console.error(
+      "[OpenRouter] Invalid API response structure:",
+      JSON.stringify(completion, null, 2)
+    );
+    return { error: "Invalid response from OpenRouter API", raw: completion };
+  }
 
   const content = completion.choices[0].message.content;
   // Extract JSON from the LLM response (may need to parse from markdown/code block)
@@ -94,7 +117,17 @@ ${pdfText}
   const profileJson = match ? match[1] : content;
   try {
     return JSON.parse(profileJson || "{}");
-  } catch {
-    return { error: "Failed to parse profile JSON", raw: profileJson };
+  } catch (parseError) {
+    console.error(
+      "[OpenRouter] Failed to parse profile JSON:",
+      parseError,
+      "\nRaw content:",
+      profileJson
+    );
+    return {
+      error: "Failed to parse profile JSON",
+      raw: profileJson,
+      details: parseError,
+    };
   }
 }

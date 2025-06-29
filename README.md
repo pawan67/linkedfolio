@@ -36,7 +36,7 @@ NEXTAUTH_URL="http://localhost:3000"
 GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
 
-# OpenRouter AI (optional)
+# OpenRouter AI 
 OPENROUTER_API_KEY="your-openrouter-api-key"
 ```
 
