@@ -8,7 +8,14 @@ import { RainbowButton } from "./magicui/rainbow-button";
 import { Card } from "./ui/card";
 import { ShineBorder } from "./magicui/shine-border";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import Image from "next/image";
 interface FileUploadProgress {
   progress: number;
   file: File;
@@ -123,6 +130,30 @@ export function FileUpload({ maxSize }: { maxSize: number }) {
           </p>
         )}
       </div>
+
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button className=" cursor-help" variant="outline" size="sm">
+            <Icon icon="mdi:help-circle" className="h-4 w-4" />
+            How to upload linkedin profile?
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className=" text-center text-lg font-medium  text-muted-foreground">
+              Go to your profile → Click on “Resources” → Then “Save to PDF”
+            </DialogTitle>
+          </DialogHeader>
+          <Image
+            src="/images/linkedin-screenshot.png"
+            alt="Linkedin profile"
+            width={1000}
+            height={1000}
+            className="rounded-lg"
+          />
+        </DialogContent>
+      </Dialog>
+
       {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
 
       {/* Alert for generation time notice */}
