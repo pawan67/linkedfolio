@@ -18,7 +18,7 @@ const Header = () => {
   const { data: session, status } = useSession();
 
   return (
-    <header className="flex py-4 items-center justify-between max-w-4xl mx-auto px-4">
+    <header className="flex py-4 items-center justify-between max-w-4xl mx-auto ">
       <Logo />
 
       <div className="flex items-center gap-2">

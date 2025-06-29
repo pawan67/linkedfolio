@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { RainbowButton } from "./magicui/rainbow-button";
 import { Card } from "./ui/card";
 import { ShineBorder } from "./magicui/shine-border";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface FileUploadProgress {
   progress: number;
@@ -17,7 +18,9 @@ export function FileUpload({ maxSize }: { maxSize: number }) {
   const [filesToUpload, setFilesToUpload] = useState<FileUploadProgress[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [generationTime, setGenerationTime] = useState<number | null>(null);
   const router = useRouter();
+
   const removeFile = (file: File) => {
     setFilesToUpload((prevUploadProgress) => {
       return prevUploadProgress.filter((item) => item.file !== file);
@@ -29,6 +32,7 @@ export function FileUpload({ maxSize }: { maxSize: number }) {
     formData.append("FILE", file);
     try {
       setIsLoading(true);
+      setGenerationTime(null);
       const response = await fetch("/api/upload-pdf", {
         method: "POST",
         body: formData,
@@ -36,8 +40,17 @@ export function FileUpload({ maxSize }: { maxSize: number }) {
       if (!response.ok) {
         throw new Error("Failed to upload file");
       }
-      await response.json();
-      router.push("/preview");
+      const result = await response.json();
+
+      // Store generation time for display
+      if (result.timing?.totalTime) {
+        setGenerationTime(result.timing.totalTime);
+      }
+
+      // Small delay to show the timing before redirect
+      setTimeout(() => {
+        router.push("/preview");
+      }, 1500);
     } catch (error) {
       setError((error as Error).message);
     } finally {
@@ -111,6 +124,30 @@ export function FileUpload({ maxSize }: { maxSize: number }) {
         )}
       </div>
       {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
+
+      {/* Alert for generation time notice */}
+      {filesToUpload.length > 0 && isLoading && (
+        <Alert className="mt-4">
+          <Icon icon="mdi:clock-outline" className="h-4 w-4" />
+          <AlertDescription>
+            Profile generation can take 15-20 seconds. Please wait patiently
+            while we process your PDF.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Success message with generation time */}
+      {generationTime && !isLoading && (
+        <Alert className="mt-4  ">
+          <Icon icon="mdi:check-circle" className="h-4 w-4 text-green-500" />
+          <AlertDescription className="text-green-500">
+            Profile generated successfully in{" "}
+            {(generationTime / 1000).toFixed(1)} seconds! Redirecting to
+            preview...
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className=" mt-5 flex justify-center">
         <RainbowButton
           disabled={filesToUpload.length === 0 || isLoading}

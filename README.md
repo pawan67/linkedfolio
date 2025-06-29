@@ -1,24 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LinkedFolio - Portfolio Builder From Resume/Linkedin
+
+A modern portfolio builder that allows users to create professional profiles from PDF resumes using AI.
+
+## Features
+
+- 📄 PDF Resume Upload & Parsing
+- 🤖 AI-powered Profile Generation
+- 🎨 Beautiful, Customizable Profiles
+- 🔗 Custom Profile URLs
+- 📱 Responsive Design
+- 🔐 Google OAuth Authentication
+- 🚀 Real-time Profile Editing
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL database
+- Google OAuth credentials
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
 
 ```bash
+# Database
+DATABASE_URL="postgresql://username:password@host:port/database"
+
+# NextAuth.js
+NEXTAUTH_SECRET="your-nextauth-secret-key-here"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Google OAuth
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# OpenRouter AI (optional)
+OPENROUTER_API_KEY="your-openrouter-api-key"
+```
+
+### Setup Google OAuth
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing one
+3. Enable Google+ API
+4. Go to Credentials → Create Credentials → OAuth 2.0 Client ID
+5. Set authorized redirect URIs:
+   - Development: `http://localhost:3000/api/auth/callback/google`
+   - Production: `https://yourdomain.com/api/auth/callback/google`
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Run database migrations
+npm run db:push
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy!
+
+### Environment Variables for Production
+
+Make sure to update these for production:
+
+```bash
+NEXTAUTH_URL="https://yourdomain.com"
+DATABASE_URL="your-production-database-url"
+```
+
+## Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Authentication**: NextAuth.js v5
+- **Database**: PostgreSQL with Drizzle ORM
+- **Styling**: Tailwind CSS
+- **UI Components**: Radix UI + shadcn/ui
+- **AI**: OpenRouter API
+- **Deployment**: Vercel
 
 ## Learn More
 

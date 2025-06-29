@@ -5,8 +5,66 @@ import { notFound } from "next/navigation";
 import { db } from "@/drizzle/db/drizzle";
 import { users } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
+import { Metadata } from "next";
 
 type Params = Promise<{ slug: string }>;
+
+// Generate metadata for the profile page
+export async function generateMetadata({
+  params,
+}: {
+  params: Params;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const profile = await getProfileBySlug(slug);
+
+  if (!profile || !profile.isPublished) {
+    return {
+      title: "Profile Not Found",
+      description: "The requested profile could not be found.",
+    };
+  }
+
+  const profileName = profile.name || "Professional";
+  const title = `${profileName} - Professional Portfolio | LinkedFolio`;
+  const description =
+    profile.bio ||
+    `${profileName}'s professional portfolio showcasing skills, experience, and achievements.`;
+
+  // Extract skill names from the skills array
+  const skillNames = profile.skills?.map((skill) => skill.name) || [];
+
+  return {
+    title,
+    description,
+    keywords: [
+      profileName,
+      "professional portfolio",
+      "resume",
+      "linkedin",
+      "career",
+      "skills",
+      "experience",
+      ...skillNames,
+    ],
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      url: `https://linkedfolio.vercel.app/${slug}`,
+      images: ["/images/logo.png"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/images/logo.png"],
+    },
+    alternates: {
+      canonical: `https://linkedfolio.vercel.app/${slug}`,
+    },
+  };
+}
 
 const ProfilePage = async ({ params }: { params: Params }) => {
   const { slug } = await params;
@@ -24,6 +82,10 @@ const ProfilePage = async ({ params }: { params: Params }) => {
     .where(eq(users.id, profile.userId));
 
   const userImage = userData[0]?.image || null;
+
+  if (!profile.isPublished) {
+    return notFound();
+  }
 
   return <ProfileViewer profileData={profile as Profile} image={userImage} />;
 };

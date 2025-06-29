@@ -3,20 +3,40 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
   const { status } = useSession();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleUploadClick = () => {
+  // Prefetch upload page when user is authenticated
+  useEffect(() => {
     if (status === "authenticated") {
-      // User is logged in, redirect to upload
-      router.push("/upload");
-    } else {
-      // User is not logged in, trigger Google sign-in
-      signIn("google");
+      router.prefetch("/upload");
+    }
+  }, [status, router]);
+
+  const handleUploadClick = async () => {
+    setIsLoading(true);
+
+    try {
+      if (status === "authenticated") {
+        // User is logged in, redirect to upload
+        router.push("/upload");
+      } else {
+        // User is not logged in, trigger Google sign-in
+        await signIn("google");
+      }
+    } catch (error) {
+      console.error("Error during upload flow:", error);
+    } finally {
+      // Don't reset loading state immediately to avoid flicker
+      setTimeout(() => setIsLoading(false), 1000);
     }
   };
+
+  const isLoadingState = status === "loading" || isLoading;
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -33,10 +53,17 @@ export default function Home() {
           onClick={handleUploadClick}
           className="h-12 w-44 mt-4 gap-2"
           variant="default"
-          disabled={status === "loading"}
+          disabled={isLoadingState}
         >
-          <Icon icon="hugeicons:ai-beautify" width="20" height="20" />
-          {status === "loading"
+          <Icon
+            icon={
+              isLoadingState ? "line-md:loading-loop" : "hugeicons:ai-beautify"
+            }
+            width="20"
+            height="20"
+            className={isLoadingState ? "animate-spin" : ""}
+          />
+          {isLoadingState
             ? "Loading..."
             : status === "authenticated"
             ? "Upload Resume"

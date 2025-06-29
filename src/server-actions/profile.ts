@@ -55,11 +55,18 @@ export const getProfile = async (userId: string) => {
 };
 
 export const checkIfProfileExists = async (userId: string) => {
-  const profile = await db
-    .select()
-    .from(profiles)
-    .where(eq(profiles.userId, userId));
-  return profile.length > 0;
+  try {
+    const profile = await db
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.userId, userId))
+      .limit(1);
+
+    return profile.length > 0;
+  } catch (error) {
+    console.error("Error checking profile existence:", error);
+    return false;
+  }
 };
 
 export const checkIfSlugExists = async (slug: string) => {

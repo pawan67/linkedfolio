@@ -3,6 +3,10 @@ import OpenAI from "openai";
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
+  defaultHeaders: {
+    "HTTP-Referer": "https://linkedfolio.vercel.app",
+    "X-Title": "LinkedFolio",
+  },
 });
 
 export async function callOpenRouterForProfile(pdfText: string) {
@@ -74,14 +78,13 @@ ${pdfText}
 `;
 
   const completion = await openai.chat.completions.create({
-    model: "mistralai/mistral-small-3.2-24b-instruct:free",
+    model: "mistralai/mistral-small-3.2-24b-instruct-2506:free",
     messages: [
       {
         role: "user",
         content: prompt,
       },
     ],
-    max_tokens: 1500,
     temperature: 0.2,
   });
 

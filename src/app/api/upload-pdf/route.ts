@@ -26,6 +26,7 @@ function shortId(length = 6) {
 }
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -68,7 +69,10 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Call OpenRouter to generate profile
+    const aiStartTime = Date.now();
     const profile = await callOpenRouterForProfile(parsedText);
+    const aiEndTime = Date.now();
+    const aiGenerationTime = aiEndTime - aiStartTime;
 
     // 2.5. Insert profile into database (without skills, experiences, socials, projects)
     const profileId = uuidv4();
@@ -157,11 +161,32 @@ export async function POST(req: NextRequest) {
       await db.insert(education).values(educationData);
     }
 
-    return NextResponse.json({ success: true, slug: slug });
+    const totalTime = Date.now() - startTime;
+
+    console.log(
+      `Profile generation completed in ${totalTime}ms (AI: ${aiGenerationTime}ms)`
+    );
+
+    return NextResponse.json({
+      success: true,
+      slug: slug,
+      generated: profile,
+      timing: {
+        totalTime: totalTime,
+        aiGenerationTime: aiGenerationTime,
+        databaseTime: totalTime - aiGenerationTime,
+      },
+    });
   } catch (error) {
-    console.error("Error processing PDF:", error);
+    const totalTime = Date.now() - startTime;
+    console.error(`Error processing PDF after ${totalTime}ms:`, error);
     return NextResponse.json(
-      { error: "Failed to process PDF" },
+      {
+        error: "Failed to process PDF",
+        timing: {
+          totalTime: totalTime,
+        },
+      },
       { status: 500 }
     );
   }
