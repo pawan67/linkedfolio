@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Plus, X } from "lucide-react";
+import { CalendarIcon, Plus, X, Save, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import type {
@@ -25,9 +25,13 @@ import type {
   Profile,
 } from "@/drizzle/db/schema";
 import { Icon } from "@iconify/react";
-// Add IconifyIcon component for rendering dynamic icons
+import { saveFullProfile } from "@/server-actions/profile";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function ProfileEditor({ profile }: { profile: Profile }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(profile.name || "");
   const [location, setLocation] = useState(profile.location || "");
   const [about, setAbout] = useState(profile.about || "");
@@ -35,7 +39,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
   const [socials, setSocials] = useState(profile.socials || []);
   const [skills, setSkills] = useState(profile.skills || []);
   const [experiences, setExperiences] = useState(profile.experiences || []);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState(profile.projects || []);
   const [newSkill, setNewSkill] = useState("");
 
   // Social Links Management
@@ -44,7 +48,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
       id: crypto.randomUUID(),
       url: "",
       icon: "mdi:link", // Default icon
-      profileId: "",
+      profileId: profile.id as string,
     };
     setSocials([...socials, newSocial]);
   };
@@ -67,7 +71,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
       const skill: Skill = {
         id: crypto.randomUUID(),
         name: newSkill.trim(),
-        profileId: "",
+        profileId: profile.id as string,
       };
       setSkills([...skills, skill]);
       setNewSkill("");
@@ -89,7 +93,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
       to: "",
       location: "",
       isCurrent: false,
-      profileId: "",
+      profileId: profile.id as string,
     };
     setExperiences([...experiences, newExperience]);
   };
@@ -118,7 +122,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
       name: "",
       url: "",
       description: "",
-      profileId: "",
+      profileId: profile.id as string,
     };
     setProjects([...projects, newProject]);
   };
@@ -133,6 +137,45 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
 
   const removeProject = (id: string) => {
     setProjects(projects.filter((project) => project.id !== id));
+  };
+
+  // Save Profile
+  const handleSaveProfile = async () => {
+    setIsLoading(true);
+    try {
+      await saveFullProfile(profile.id, {
+        name,
+        location,
+        bio,
+        about,
+        skills,
+        experiences: experiences.map((exp) => ({
+          id: exp.id,
+          role: exp.role,
+          company: exp.company || undefined,
+          description: exp.description || undefined,
+          from: exp.from,
+          to: exp.to || undefined,
+          location: exp.location || undefined,
+          isCurrent: exp.isCurrent || false,
+        })),
+        projects: projects.map((project) => ({
+          id: project.id,
+          name: project.name,
+          url: project.url || undefined,
+          description: project.description || undefined,
+        })),
+        socials,
+      });
+
+      toast.success("Profile saved successfully!");
+      router.refresh();
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      toast.error("Failed to save profile. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const DatePicker = ({
@@ -171,7 +214,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto   space-y-5">
+    <div className="max-w-3xl mx-auto space-y-5">
       <Card>
         <CardHeader>
           <CardTitle>Header</CardTitle>
@@ -573,8 +616,23 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button size="lg" className="px-8">
-          Save Profile
+        <Button
+          size="lg"
+          className="px-8"
+          onClick={handleSaveProfile}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              Save Profile
+            </>
+          )}
         </Button>
       </div>
     </div>

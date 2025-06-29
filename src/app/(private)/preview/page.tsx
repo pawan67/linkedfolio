@@ -1,15 +1,22 @@
 import Preview from "@/components/preview";
 import { Profile } from "@/drizzle/db/schema";
 import { getProfile } from "@/server-actions/profile";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 const PreviewPage = async () => {
-  const user = await currentUser();
-  const profile = await getProfile(user?.id as string);
-  if (!user || !profile) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
     redirect("/");
   }
+
+  const profile = await getProfile(session.user.id);
+
+  if (!profile) {
+    redirect("/upload");
+  }
+
   return <Preview profile={profile as Profile} />;
 };
 

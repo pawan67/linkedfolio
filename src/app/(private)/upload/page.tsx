@@ -1,12 +1,16 @@
 import { FileUpload } from "@/components/upload";
 import { checkIfProfileExists } from "@/server-actions/profile";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function UploadPage() {
-  const user = await currentUser();
+  const session = await auth();
 
-  const profileExists = await checkIfProfileExists(user?.id || "");
+  if (!session?.user?.id) {
+    redirect("/");
+  }
+
+  const profileExists = await checkIfProfileExists(session.user.id);
 
   if (profileExists) {
     redirect("/preview");

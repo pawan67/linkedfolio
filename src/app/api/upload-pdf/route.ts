@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import { v4 as uuidv4 } from "uuid";
 import PDFParser from "pdf2json";
 import os from "os";
-import { getAuth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 import { callOpenRouterForProfile } from "@/lib/openrouter";
 import { db } from "@/drizzle/db/drizzle";
 import {
@@ -26,8 +26,8 @@ function shortId(length = 6) {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId } = getAuth(req);
-  if (!userId) {
+  const session = await auth();
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -74,88 +74,94 @@ export async function POST(req: NextRequest) {
     const profileId = uuidv4();
     const slug = profile.slug + "-" + shortId();
     const now = new Date();
-    const [insertedProfile] = await db
-      .insert(profiles)
-      .values({
-        userId: userId,
-        slug: slug,
-        id: profileId,
-        bio: profile.bio ?? "",
-        name: profile.name ?? "",
-        location: profile.location ?? "",
-        about: profile.about ?? "",
-        createdAt: now,
-        updatedAt: now,
-        isPublished: false,
-      })
-      .returning();
 
-    // 2.6. Insert related data into their own tables
-    if (Array.isArray(profile.skills) && profile.skills.length > 0) {
-      await db.insert(skills).values(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        profile.skills.map((skill: any) => ({
-          name: skill.name,
-          profileId,
-        }))
-      );
+    await db.insert(profiles).values({
+      id: profileId,
+      userId: session.user.id,
+      slug: slug,
+      name: profile.name,
+      location: profile.location,
+      bio: profile.bio,
+      about: profile.about,
+      createdAt: now,
+      updatedAt: now,
+      isPublished: false,
+    });
+
+    // 3. Insert skills
+    if (profile.skills && profile.skills.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const skillsData = profile.skills.map((skill: any) => ({
+        id: uuidv4(),
+        profileId: profileId,
+        name: skill.name,
+      }));
+      await db.insert(skills).values(skillsData);
     }
-    if (Array.isArray(profile.experiences) && profile.experiences.length > 0) {
-      await db.insert(experiences).values(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        profile.experiences.map((exp: any) => ({
-          role: exp.role,
-          company: exp.company,
-          description: exp.description,
-          from: exp.from,
-          to: exp.to,
-          location: exp.location,
-          isCurrent: exp.isCurrent ?? false,
-          profileId,
-        }))
-      );
+
+    // 4. Insert experiences
+    if (profile.experiences && profile.experiences.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const experiencesData = profile.experiences.map((exp: any) => ({
+        id: uuidv4(),
+        profileId: profileId,
+        role: exp.role,
+        company: exp.company,
+        description: exp.description,
+        from: new Date(exp.from),
+        to: exp.to ? new Date(exp.to) : null,
+        location: exp.location,
+        isCurrent: exp.isCurrent || false,
+      }));
+      await db.insert(experiences).values(experiencesData);
     }
-    if (Array.isArray(profile.projects) && profile.projects.length > 0) {
-      await db.insert(projects).values(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        profile.projects.map((proj: any) => ({
-          name: proj.name,
-          url: proj.url,
-          description: proj.description,
-          profileId,
-        }))
-      );
+
+    // 5. Insert projects
+    if (profile.projects && profile.projects.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const projectsData = profile.projects.map((project: any) => ({
+        id: uuidv4(),
+        profileId: profileId,
+        name: project.name,
+        url: project.url,
+        description: project.description,
+      }));
+      await db.insert(projects).values(projectsData);
     }
-    if (Array.isArray(profile.socials) && profile.socials.length > 0) {
-      await db.insert(socials).values(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        profile.socials.map((soc: any) => ({
-          url: soc.url,
-          icon: soc.icon,
-          profileId,
-        }))
-      );
+
+    // 6. Insert socials
+    if (profile.socials && profile.socials.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const socialsData = profile.socials.map((social: any) => ({
+        id: uuidv4(),
+        profileId: profileId,
+        url: social.url,
+        icon: social.icon,
+      }));
+      await db.insert(socials).values(socialsData);
     }
-    if (Array.isArray(profile.education) && profile.education.length > 0) {
-      await db.insert(education).values(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        profile.education.map((edu: any) => ({
-          degree: edu.degree,
-          institution: edu.institution,
-          from: edu.from,
-          to: edu.to,
-          location: edu.location,
-          description: edu.description,
-          profileId,
-        }))
-      );
+
+    // 7. Insert education
+    if (profile.education && profile.education.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const educationData = profile.education.map((edu: any) => ({
+        id: uuidv4(),
+        profileId: profileId,
+        degree: edu.degree,
+        institution: edu.institution,
+        from: new Date(edu.from),
+        to: edu.to ? new Date(edu.to) : null,
+        location: edu.location,
+        description: edu.description,
+      }));
+      await db.insert(education).values(educationData);
     }
-    // 3. Return the generated profile and DB result
-    return NextResponse.json({ profile, fileName, insertedProfile });
-  } catch (err) {
-    console.error(err);
+
+    return NextResponse.json({ success: true, slug: slug });
+  } catch (error) {
+    console.error("Error processing PDF:", error);
     return NextResponse.json(
-      { error: "Failed to extract text from PDF" },
+      { error: "Failed to process PDF" },
       { status: 500 }
     );
   }

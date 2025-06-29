@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import ProfileViewer from "./profile-viewer";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useDebouncedValue } from "@mantine/hooks";
@@ -39,6 +39,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "../ui/input";
+
 const Preview = ({ profile }: { profile: Profile }) => {
   const [view, setView] = useState("preview");
   const router = useRouter();
@@ -103,29 +104,33 @@ const Preview = ({ profile }: { profile: Profile }) => {
       },
     });
 
-  const { user } = useUser();
+  const { data: session } = useSession();
 
   const handleDelete = () => {
     deleteProfileMutation();
   };
 
-  console.log(profile);
+  console.log("Profile data:", profile);
+  console.log("Profile isPublished:", profile.isPublished);
+
   return (
     <main className="max-w-3xl mx-auto">
-      <Card className="  p-4">
-        <div className=" flex  gap-5 items-center flex-col md:flex-row  lg:justify-between w-full">
-          <div className=" flex items-center gap-2 ">
-            <div className=" flex items-center gap-2">
+      <Card className="p-4">
+        <div className="flex gap-5 items-center flex-col md:flex-row md:justify-between w-full">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Icon icon="ic:baseline-link" width="24" height="24" />
-              <span className=" text-sm">linkedfolio.vercel.app/</span>
+              <span className="text-sm hidden md:block">
+                linkedfolio.vercel.app/
+              </span>
             </div>
 
-            <div className=" flex items-center gap-2 border rounded-lg  ">
-              <div className=" px-3 w-40 text-sm">{profile.slug}</div>
-              <div className=" border-l">
+            <div className="flex items-center gap-2 border rounded-lg">
+              <div className="px-3 w-40 text-sm">{profile.slug}</div>
+              <div className="border-l">
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="ghost" className=" size-11" size="icon">
+                    <Button variant="ghost" className="size-11" size="icon">
                       <Icon icon="mdi:pencil" width="24" height="24" />
                     </Button>
                   </DialogTrigger>
@@ -136,10 +141,10 @@ const Preview = ({ profile }: { profile: Profile }) => {
                         Edit the slug for your profile.
                       </DialogDescription>
                     </DialogHeader>
-                    <div className=" flex items-center gap-2">
-                      <div className=" flex flex-col gap-2 w-full">
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-col gap-2 w-full">
                         <Input
-                          className={` ${
+                          className={`${
                             isSlugAvailable
                               ? "border-green-500"
                               : "border-red-500"
@@ -151,7 +156,7 @@ const Preview = ({ profile }: { profile: Profile }) => {
                           }}
                           placeholder="Enter new slug"
                         />
-                        <p className=" text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {isCheckingSlug
                             ? "Checking..."
                             : isSlugAvailable
@@ -172,10 +177,10 @@ const Preview = ({ profile }: { profile: Profile }) => {
             </div>
           </div>
 
-          <div className=" flex items-center gap-2">
-            <div className=" text-sm flex items-center gap-1  ">
+          <div className="flex items-center gap-3">
+            <div className="text-sm flex items-center gap-1">
               <div
-                className={` ${
+                className={`${
                   profile.isPublished ? "bg-green-500" : "bg-orange-500"
                 } dark:bg-orange-300 size-2 rounded-full`}
               ></div>
@@ -199,69 +204,82 @@ const Preview = ({ profile }: { profile: Profile }) => {
                 "Publish"
               )}
             </Button>
-            {profile.isPublished && (
-              <Link
-                target="_blank"
-                rel="noopener noreferrer"
-                href={`/${profile.slug}`}
-                className={cn(buttonVariants())}
-              >
-                <Icon icon="mdi:eye" width="24" height="24" />
-                <span>Preview</span>
-              </Link>
-            )}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button size="icon">
-                  <Icon icon="mdi:delete" width="24" height="24" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDelete}
-                    disabled={isDeleting}
+
+            <div className="flex items-center gap-3 flex-wrap">
+              {profile.isPublished && (
+                <Link
+                  href={`/${profile.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    buttonVariants({ variant: "default", size: "icon" }),
+                    "flex items-center gap-2"
+                  )}
+                >
+                  <Icon icon="lucide:external-link" width="16" height="16" />
+                </Link>
+              )}
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    className="flex items-center gap-2"
+                    size="icon"
                   >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    <Icon icon="lucide:trash-2" width="16" height="16" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your profile and remove all your data from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         </div>
       </Card>
-      <div className=" flex items-center justify-between w-full">
-        <div className=" my-5 flex items-center gap-2">
-          <Button
-            variant={view === "preview" ? "outline" : "ghost"}
-            onClick={() => setView("preview")}
-          >
-            <Icon icon="mdi:eye" width="24" height="24" />
-            <span>Preview</span>
-          </Button>
-          <Button
-            variant={view === "edit" ? "outline" : "ghost"}
-            onClick={() => setView("edit")}
-          >
-            <Icon icon="mdi:pencil" width="24" height="24" />
-            <span>Edit</span>
-          </Button>
+
+      <div className="flex items-center gap-2 mt-4">
+        <Button
+          variant={view === "preview" ? "default" : "outline"}
+          onClick={() => setView("preview")}
+        >
+          Preview
+        </Button>
+        <Button
+          variant={view === "edit" ? "default" : "outline"}
+          onClick={() => setView("edit")}
+        >
+          Edit
+        </Button>
+      </div>
+
+      {view === "preview" ? (
+        <div className="mt-4">
+          <ProfileViewer
+            profileData={profile}
+            image={session?.user?.image || null}
+          />
         </div>
-      </div>
-      <div className="  ">
-        {view === "preview" ? (
-          <ProfileViewer image={user?.imageUrl} profileData={profile} />
-        ) : (
+      ) : (
+        <div className="mt-4">
           <ProfileEditor profile={profile} />
-        )}
-      </div>
+        </div>
+      )}
     </main>
   );
 };
