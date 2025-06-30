@@ -92,7 +92,7 @@ export default function RootLayout({
     <SessionProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable}   ${spaceGrotesk.variable}  font-space-grotesk   antialiased bg-bg dark:bg-secondaryBlack bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:70px_70px]`}
+          className={`${geistSans.variable} ${geistMono.variable}   ${spaceGrotesk.variable}  font-space-grotesk   antialiased bg-bg  bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-[size:10px_10px]  dark:bg-[linear-gradient(to_right,#191919_1px,transparent_1px),linear-gradient(to_bottom,#191919_1px,transparent_1px)] bg-[size:10px_10px]`}
         >
           <Provider>{children}</Provider>
         </body>

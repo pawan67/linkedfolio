@@ -6,6 +6,7 @@ import { db } from "@/drizzle/db/drizzle";
 import { users } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
 import { Metadata } from "next";
+import SlugHeader from "@/components/shared/slug-header";
 
 type Params = Promise<{ slug: string }>;
 
@@ -87,7 +88,15 @@ const ProfilePage = async ({ params }: { params: Params }) => {
     return notFound();
   }
 
-  return <ProfileViewer profileData={profile as Profile} image={userImage} />;
+  return (
+    <>
+      <SlugHeader image={userImage} profileData={profile as Profile} />
+
+      <main className="  ">
+        <ProfileViewer profileData={profile as Profile} image={userImage} />
+      </main>
+    </>
+  );
 };
 
 export default ProfilePage;

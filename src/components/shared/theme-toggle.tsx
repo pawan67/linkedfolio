@@ -2,8 +2,9 @@ import { useTheme } from "next-themes";
 import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
+import { cn } from "@/lib/utils";
 
-const ThemeToggle = () => {
+const ThemeToggle = ({ className }: { className?: string }) => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -24,7 +25,7 @@ const ThemeToggle = () => {
     <div>
       <Button
         onClick={toggleTheme}
-        className=" rounded-full   text-primary "
+        className={cn("rounded-full", className)}
         variant="outline"
         size="icon"
       >

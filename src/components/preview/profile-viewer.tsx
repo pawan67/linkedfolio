@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CalendarDays, MapPin, Building, ExternalLink } from "lucide-react";
@@ -8,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Profile } from "@/drizzle/db/schema";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
-import ThemeToggle from "../shared/theme-toggle";
 import Image from "next/image";
 import Script from "next/script";
 import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader } from "../ui/card";
 
 interface ProfileViewerProps {
   profileData: Profile;
@@ -132,32 +131,28 @@ export default function ProfileViewer({
           },
         }}
       >
-        {/* Header Section */}
         <motion.div
           variants={{
             hidden: { opacity: 0, y: 24 },
             visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
           }}
         >
-          <Card className="overflow-hidden relative">
-            <div className="absolute top-4 right-4 z-10">
-              <ThemeToggle />
-            </div>
-            <CardContent className="   ">
-              <div className="flex flex-col-reverse text-center md:text-left items-center  md:flex-row gap-4 md:gap-8   ">
-                <div className="flex-1 space-y-4">
+          <div className="overflow-hidden font-sans relative">
+            <div>
+              <div className="flex flex-col-reverse my-20 justify-between  text-left    md:flex-row gap-4 md:gap-8   ">
+                <div className="flex-1 max-w-lg space-y-4">
                   <div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">
-                      {name}
+                    <h1 className="text-3xl tracking-tight font-bold text-foreground mb-2">
+                      Hey there, <br />
+                      I’m {name}
                     </h1>
-                    <p className="text-lg text-muted-foreground mb-3">{bio}</p>
-                    <div className="flex justify-center md:justify-start items-center text-muted-foreground mb-4">
+                    <p className="    mb-3">{bio}</p>
+                    <div className="flex   md:justify-start items-center text-sm text-muted-foreground mb-4">
                       <MapPin className="w-4 h-4 mr-2" />
                       <span>{location}</span>
                     </div>
                   </div>
-
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2  ">
+                  <div className="flex flex-wrap items-center    justify-start gap-2  ">
                     {socials.map((social, index) => {
                       return (
                         <Link
@@ -173,7 +168,6 @@ export default function ProfileViewer({
                     })}
                   </div>
                 </div>
-
                 <div className="flex-shrink-0">
                   <div className="w-32 h-32 rounded-full overflow-hidden bg-muted border-4 border-background shadow-lg">
                     <Image
@@ -186,214 +180,222 @@ export default function ProfileViewer({
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+            </div>
+            <div className=" mt-16">
+              {/* About Section */}
+              <motion.div
+                id="about"
+                variants={{
+                  hidden: { opacity: 0, y: 24 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+                }}
+              >
+                <h2 className="text-3xl tracking-tight font-semibold mb-2">
+                  About
+                </h2>
+                <p className="text-foreground whitespace-pre-line mt-5 leading-relaxed mb-6">
+                  {about}
+                </p>
+              </motion.div>
 
-        {/* About Section */}
-        <motion.div
-          variants={{
-            hidden: { opacity: 0, y: 24 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-          }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>About</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-foreground leading-relaxed">{about}</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Work Experience Section */}
-        {experiences.length > 0 && (
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 24 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-            }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="w-5 h-5" />
-                  Work Experience
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {experiences.map((exp, index) => (
-                  <div key={exp.id}>
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground">
-                          {exp.role}
-                        </h3>
-                        <p className="text-primary font-medium">
-                          {exp.company}
-                        </p>
-                      </div>
-                      <div className="flex flex-col sm:items-end text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <CalendarDays className="w-4 h-4" />
-                          <span>
-                            {formatDate(exp.from)} -{" "}
-                            {exp.to ? formatDate(exp.to) : "Present"}
-                          </span>
+              {/* Work Experience Section */}
+              {experiences.length > 0 && (
+                <motion.div
+                  id="experiences"
+                  variants={{
+                    hidden: { opacity: 0, y: 24 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.6 },
+                    },
+                  }}
+                  className="my-16"
+                >
+                  <h2 className="text-3xl tracking-tight font-semibold mb-2 flex items-center gap-2">
+                    <Building className="w-5 h-5" /> Work Experience
+                  </h2>
+                  <Card className=" mt-10">
+                    <CardContent className="space-y-6">
+                      {experiences.map((exp, index) => (
+                        <div key={exp.id}>
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                            <div>
+                              <h3 className="text-lg font-semibold text-foreground">
+                                {exp.role}
+                              </h3>
+                              <p className="text-primary font-medium">
+                                {exp.company}
+                              </p>
+                            </div>
+                            <div className="flex flex-col sm:items-end text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <CalendarDays className="w-4 h-4" />
+                                <span>
+                                  {formatDate(exp.from)} -{" "}
+                                  {exp.to ? formatDate(exp.to) : "Present"}
+                                </span>
+                              </div>
+                              <span className="text-xs">
+                                {calculateDuration(exp.from, exp.to)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
+                            <MapPin className="w-4 h-4" />
+                            <span>{exp.location}</span>
+                            {exp.isCurrent && (
+                              <Badge variant="secondary" className="ml-2">
+                                Current
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-foreground">{exp.description}</p>
+                          {index < experiences.length - 1 && (
+                            <Separator className="mt-6" />
+                          )}
                         </div>
-                        <span className="text-xs">
-                          {calculateDuration(exp.from, exp.to)}
-                        </span>
-                      </div>
-                    </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
 
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
-                      <MapPin className="w-4 h-4" />
-                      <span>{exp.location}</span>
-                      {exp.isCurrent && (
-                        <Badge variant="secondary" className="ml-2">
-                          Current
-                        </Badge>
-                      )}
-                    </div>
-
-                    <p className="text-foreground">{exp.description}</p>
-
-                    {index < experiences.length - 1 && (
-                      <Separator className="mt-6" />
-                    )}
+              {/* Projects Section */}
+              {projects.length > 0 && (
+                <motion.div
+                  id="projects"
+                  variants={{
+                    hidden: { opacity: 0, y: 24 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.6 },
+                    },
+                  }}
+                  className=" my-16"
+                >
+                  <h2 className="text-3xl tracking-tight font-semibold mb-2 flex items-center gap-2">
+                    Projects
+                  </h2>
+                  <div className="space-y-6 mt-5">
+                    {projects.map((project) => (
+                      <Card key={project.id}>
+                        <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                          <h3 className="text-lg font-semibold text-foreground">
+                            {project.name}
+                          </h3>
+                          <div className="flex gap-2">
+                            {project.url && (
+                              <Button variant="outline" size="sm" asChild>
+                                <a
+                                  href={project.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                  View Project
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-foreground">
+                            {project.description}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+                </motion.div>
+              )}
 
-        {/* Projects Section */}
-        {projects.length > 0 && (
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 24 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-            }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Projects</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {projects.map((project, index) => (
-                  <div key={project.id}>
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-                      <h3 className="text-lg font-semibold text-foreground">
-                        {project.name}
-                      </h3>
-                      <div className="flex gap-2">
-                        {project.url && (
-                          <Button variant="outline" size="sm" asChild>
-                            <a
-                              href={project.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                              View Project
-                            </a>
-                          </Button>
+              {/* Skills Section */}
+              {skills.length > 0 && (
+                <motion.div
+                  id="skills"
+                  variants={{
+                    hidden: { opacity: 0, y: 24 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.6 },
+                    },
+                  }}
+                  className="my-16"
+                >
+                  <h2 className="text-3xl tracking-tight font-semibold mb-2 flex items-center gap-2">
+                    Skills
+                  </h2>
+                  <div className="flex mt-5 flex-wrap gap-2">
+                    {skills.map((skill) => (
+                      <Badge key={skill.id} variant="default">
+                        {skill.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Education Section */}
+              {education.length > 0 && (
+                <motion.div
+                  id="education"
+                  variants={{
+                    hidden: { opacity: 0, y: 24 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.6 },
+                    },
+                  }}
+                  className="my-16"
+                >
+                  <h2 className="text-3xl tracking-tight font-semibold mb-2 flex items-center gap-2">
+                    Education
+                  </h2>
+                  <div className="space-y-6 mt-10">
+                    {education.map((edu, index) => (
+                      <div key={edu.id}>
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                          <div>
+                            <h3 className="text-lg font-semibold text-foreground">
+                              {edu.degree}
+                            </h3>
+                            <p className="text-primary font-medium">
+                              {edu.institution}
+                            </p>
+                          </div>
+                          <div className="flex flex-col sm:items-end text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <CalendarDays className="w-4 h-4" />
+                              <span>
+                                {formatDate(edu.from)} -{" "}
+                                {edu.to ? formatDate(edu.to) : "Present"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
+                          <MapPin className="w-4 h-4" />
+                          <span>{edu.location}</span>
+                        </div>
+                        {edu.description && (
+                          <p className="text-foreground">{edu.description}</p>
+                        )}
+                        {index < education.length - 1 && (
+                          <Separator className="mt-6" />
                         )}
                       </div>
-                    </div>
-                    <p className="text-foreground">{project.description}</p>
-                    {index < projects.length - 1 && (
-                      <Separator className="mt-6" />
-                    )}
+                    ))}
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Skills Section */}
-        {skills.length > 0 && (
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 24 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-            }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Skills</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((skill) => (
-                    <Badge key={skill.id} variant="secondary">
-                      {skill.name}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Education Section */}
-        {education.length > 0 && (
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 24 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-            }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Education</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {education.map((edu, index) => (
-                  <div key={edu.id}>
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground">
-                          {edu.degree}
-                        </h3>
-                        <p className="text-primary font-medium">
-                          {edu.institution}
-                        </p>
-                      </div>
-                      <div className="flex flex-col sm:items-end text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <CalendarDays className="w-4 h-4" />
-                          <span>
-                            {formatDate(edu.from)} -{" "}
-                            {edu.to ? formatDate(edu.to) : "Present"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
-                      <MapPin className="w-4 h-4" />
-                      <span>{edu.location}</span>
-                    </div>
-
-                    {edu.description && (
-                      <p className="text-foreground">{edu.description}</p>
-                    )}
-
-                    {index < education.length - 1 && (
-                      <Separator className="mt-6" />
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </motion.div>
       </motion.div>
     </>
   );

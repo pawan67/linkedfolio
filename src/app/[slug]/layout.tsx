@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className=" max-w-3xl my-5 mx-auto">
+    <div className=" max-w-3xl mb-5  mx-auto">
       {children}
       <Card className=" mt-5 p-5">
         <div>
